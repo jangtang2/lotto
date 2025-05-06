@@ -1,0 +1,183 @@
+
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NFC 태그 설정</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            padding-bottom: 50px;
+        }
+        .jumbotron {
+            background-color: #0dcaf0;
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 0.3rem;
+        }
+        .card {
+            margin-bottom: 20px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .footer {
+            margin-top: 30px;
+            padding: 20px 0;
+            background-color: #f1f1f1;
+            text-align: center;
+        }
+        .nfc-info {
+            background-color: #e9f7fb;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="jumbotron text-center">
+        <h1>NFC 태그 설정</h1>
+        <p>NFC 태그를 통한 간편 접근 설정</p>
+    </div>
+    
+    <div class="container">
+        <div class="row mb-4">
+            <div class="col-md-12">
+                <a href="/" class="btn btn-secondary mb-3">메인으로 돌아가기</a>
+            </div>
+        </div>
+        
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-info text-white">
+                        <h4>NFC 태그 설정 안내</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="nfc-info">
+                            <h5>NFC 태그란?</h5>
+                            <p>NFC(Near Field Communication) 태그는 스마트폰을 태그에 가까이 대면 
+                            특정 동작을 수행하도록 하는 기술입니다. 이를 통해 웹사이트에 쉽게 접근할 수 있습니다.</p>
+                        </div>
+                        
+                        <h5>태그 설정 방법</h5>
+                        <ol>
+                            <li>NFC 태그를 구입합니다. (온라인 쇼핑몰에서 쉽게 구매 가능)</li>
+                            <li>아래에서 접근하고 싶은 페이지를 선택합니다.</li>
+                            <li>생성된 URL을 NFC 태그 기록 앱을 사용하여 태그에 기록합니다.</li>
+                            <li>태그에 스마트폰을 가까이 대면 해당 페이지로 바로 접근할 수 있습니다.</li>
+                        </ol>
+                        
+                        <form id="nfcForm" class="mt-4">
+                            <div class="mb-3">
+                                <label for="baseUrl" class="form-label">사이트 기본 URL</label>
+                                <input type="text" class="form-control" id="baseUrl" 
+                                       placeholder="https://yourdomain.com/" required>
+                                <div class="form-text">호스팅된 사이트의 URL을 입력하세요.</div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="accessType" class="form-label">접근할 페이지</label>
+                                <select class="form-select" id="accessType" required>
+                                    <option value="">메인 페이지</option>
+                                </select>
+                                <div class="form-text">NFC 태그로 접근할 페이지를 선택하세요.</div>
+                            </div>
+                            
+                            <button type="submit" class="btn btn-info">NFC 데이터 생성</button>
+                        </form>
+                        
+                        <div id="nfcResult" class="mt-4" style="display: none;">
+                            <h5>NFC 태그 데이터</h5>
+                            <div class="card">
+                                <div class="card-body">
+                                    <p><strong>URL:</strong> <span id="resultUrl"></span></p>
+                                    <p><strong>안드로이드 인텐트:</strong> <span id="resultIntent"></span></p>
+                                    <p><strong>설명:</strong> <span id="resultDesc"></span></p>
+                                    <button id="copyUrlBtn" class="btn btn-sm btn-outline-primary">URL 복사</button>
+                                    <button id="copyIntentBtn" class="btn btn-sm btn-outline-secondary">인텐트 복사</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header bg-light">
+                        <h4>NFC 태그 사용 팁</h4>
+                    </div>
+                    <div class="card-body">
+                        <ul>
+                            <li>태그는 금속 표면에 부착하면 인식률이 떨어질 수 있습니다.</li>
+                            <li>스마트폰 설정에서 NFC 기능이 활성화되어 있어야 합니다.</li>
+                            <li>태그를 스마트폰 뒷면 중앙에 가까이 대면 가장 잘 인식됩니다.</li>
+                            <li>안드로이드 사용자는 'NFC Tools'와 같은 앱을 사용하여 태그를 기록할 수 있습니다.</li>
+                            <li>iOS 사용자는 'NFC TagWriter by NXP'와 같은 앱을 사용할 수 있습니다.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>&copy; 2025 로또 번호 분석 및 추천 서비스</p>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.getElementById('nfcForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // 입력값 가져오기
+            const baseUrl = document.getElementById('baseUrl').value.trim();
+            const accessType = document.getElementById('accessType').value;
+            
+            // 기본 URL 형식 확인
+            let formattedBaseUrl = baseUrl;
+            if (formattedBaseUrl && !formattedBaseUrl.endsWith('/')) {
+                formattedBaseUrl += '/';
+            }
+            
+            // AJAX 요청
+            fetch('/generate-nfc-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: `base_url=${encodeURIComponent(formattedBaseUrl)}&access_type=${encodeURIComponent(accessType)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                // 결과 표시
+                document.getElementById('resultUrl').textContent = data.url;
+                document.getElementById('resultIntent').textContent = data.android_intent;
+                document.getElementById('resultDesc').textContent = data.description;
+                document.getElementById('nfcResult').style.display = 'block';
+                
+                // 복사 버튼 설정
+                document.getElementById('copyUrlBtn').onclick = function() {
+                    navigator.clipboard.writeText(data.url);
+                    alert('URL이 클립보드에 복사되었습니다.');
+                };
+                
+                document.getElementById('copyIntentBtn').onclick = function() {
+                    navigator.clipboard.writeText(data.android_intent);
+                    alert('안드로이드 인텐트가 클립보드에 복사되었습니다.');
+                };
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('NFC 데이터 생성 중 오류가 발생했습니다.');
+            });
+        });
+    </script>
+</body>
+</html>
+        
