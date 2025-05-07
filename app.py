@@ -1,20 +1,27 @@
-import os
-from flask import Flask
+import threading
+import time
+import schedule
+from datetime import datetime
 
-# Flask 애플리케이션 생성
-app = Flask(__name__)
-app.secret_key = os.urandom(24)  # 세션 암호화를 위한 키
+def run_scheduler():
+    from analyzer import LottoAnalyzer
+    analyzer = LottoAnalyzer()
+    
+    # 초기 추천 번호 생성
+    if not os.path.exists('data/recommendations.json'):
+        analyzer.generate_weekly_recommendations()
+    
+    # 스케줄 설정
+    # 일요일 새벽 5시
+    schedule.every().sunday.at("05:00").do(analyzer.generate_weekly_recommendations)
+    # 토요일 밤 10시
+    schedule.every().saturday.at("22:00").do(analyzer.check_lottery_results)
+    
+    while True:
+        schedule.run_pending()
+        time.sleep(60)
 
-# Jinja2에 min 및 max 함수 추가
-app.jinja_env.globals.update(min=min, max=max)
-
-# 라우트 등록
-from routes import register_routes
-register_routes(app)
-
-# 스케줄러 시작
-from scheduler import start_scheduler
-start_scheduler()
-
-if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000, debug=True)
+# 백그라운드에서 스케줄러 실행
+scheduler_thread = threading.Thread(target=run_scheduler)
+scheduler_thread.daemon = True
+scheduler_thread.start()
