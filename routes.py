@@ -5,14 +5,23 @@ from flask import render_template, jsonify, request, redirect, url_for, session
 from analyzer import LottoAnalyzer
 from templates import create_templates
 
+# 전역 분석기 인스턴스 생성
+analyzer = LottoAnalyzer()
+
 # 애플리케이션 초기화 시 실행할 함수
 def setup_app():
     """애플리케이션 초기화 시 실행할 설정"""
+    global analyzer
+    
     # 템플릿 디렉토리 확인 및 생성
     os.makedirs('templates', exist_ok=True)
     
     # 템플릿 파일 생성
     create_templates()
+    
+    # 초기 데이터 로드
+    analyzer.fetch_lotto_data()
+    analyzer.analyze_frequency()
 
 def register_routes(app):
     """Flask 애플리케이션에 라우트 등록"""
@@ -23,14 +32,7 @@ def register_routes(app):
     @app.route('/')
     def index():
         """통합 메인 페이지 - 번호 추천 및 당첨 결과 확인"""
-        # 분석기 인스턴스 생성
-        analyzer = LottoAnalyzer()
-        
-        # 데이터 로드
-        analyzer.fetch_lotto_data()
-        
-        # 빈도 분석
-        analyzer.analyze_frequency()
+        global analyzer
         
         # 저장된 추천 번호 확인
         now = datetime.now()
@@ -46,7 +48,7 @@ def register_routes(app):
             all_combinations = analyzer.weekly_recommendations[week_key]['combinations']
             generation_time = analyzer.weekly_recommendations[week_key]['generated_at']
         else:
-            # 30개 번호 조합 생성
+            # 이미 분석된 데이터가 있으므로 번호 생성만 수행
             all_combinations = analyzer.recommend_numbers(30)
             generation_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
             
@@ -59,6 +61,8 @@ def register_routes(app):
         
         # 세션에 모든 조합 저장
         session['all_combinations'] = all_combinations
+        session['week_key'] = week_key
+        session['generation_time'] = generation_time
         
         # 5개 랜덤 선택
         if len(all_combinations) > 5:
@@ -76,30 +80,18 @@ def register_routes(app):
             reverse=True
         )
         
-        # 최근 당첨 번호
-        recent_data = analyzer.lotto_data[:3] if analyzer.lotto_data else []
-        
-        # 핫, 콜드, 듀 번호
-        number_stats = {
-            'hot_numbers': analyzer.hot_numbers[:6],  # 상위 6개만
-            'cold_numbers': analyzer.cold_numbers[:6],  # 상위 6개만
-            'due_numbers': analyzer.due_numbers[:6] if len(analyzer.due_numbers) >= 6 else analyzer.due_numbers  # 최대 6개
-        }
-        
         return render_template(
             'index.html',
             combinations=selected_combinations,
             total_combinations=len(all_combinations),
             target_date=week_key,
             generated_at=generation_time,
-            recent_data=recent_data,
-            number_stats=number_stats,
             results=sorted_results[:1] if sorted_results else []  # 가장 최근 결과만
         )
     
     @app.route('/refresh-combinations')
     def refresh_combinations():
-        """추천 번호 새로고침"""
+        """추천 번호 새로고침 (데이터 로드 없이 세션에서 가져옴)"""
         # 세션에서 모든 조합 가져오기
         all_combinations = session.get('all_combinations', [])
         
