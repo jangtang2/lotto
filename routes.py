@@ -143,3 +143,34 @@ def register_routes(app):
             'android_intent': android_nfc_intent,
             'description': f"이 태그는 로또 번호 분석 및 추천 애플리케이션{'의 ' + access_type + ' 페이지' if access_type else ''}로 연결됩니다."
         })
+    
+    @app.route('/cron/generate-recommendations', methods=['POST'])
+    def cron_generate_recommendations():
+        """GitHub Actions에서 호출하는 추천 번호 생성"""
+        # GitHub Actions의 IP를 확인하거나 간단한 인증 추가 가능
+        user_agent = request.headers.get('User-Agent', '')
+        if 'curl' not in user_agent:
+            return "Unauthorized", 401
+        
+        try:
+            from analyzer import LottoAnalyzer
+            analyzer = LottoAnalyzer()
+            analyzer.generate_weekly_recommendations()
+            return {"status": "success", "message": "Recommendations generated"}, 200
+        except Exception as e:
+            return {"status": "error", "message": str(e)}, 500
+    
+    @app.route('/cron/check-results', methods=['POST'])
+    def cron_check_results():
+        """GitHub Actions에서 호출하는 당첨 결과 확인"""
+        user_agent = request.headers.get('User-Agent', '')
+        if 'curl' not in user_agent:
+            return "Unauthorized", 401
+        
+        try:
+            from analyzer import LottoAnalyzer
+            analyzer = LottoAnalyzer()
+            analyzer.check_lottery_results()
+            return {"status": "success", "message": "Results checked"}, 200
+        except Exception as e:
+            return {"status": "error", "message": str(e)}, 500

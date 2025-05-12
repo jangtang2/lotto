@@ -1,0 +1,25 @@
+name: Lotto Scheduler
+
+on:
+  schedule:
+    # 매주 일요일 오전 5시 (UTC: 일요일 20시)
+    - cron: "0 20 * * 0"
+    # 매주 토요일 오후 10시 (UTC: 토요일 13시)
+    - cron: "0 13 * * 6"
+
+jobs:
+  generate-recommendations:
+    if: github.event.schedule == '0 20 * * 0' # 일요일만
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate Weekly Recommendations
+        run: |
+          curl -X POST ${{ secrets.APP_URL }}/cron/generate-recommendations
+
+  check-results:
+    if: github.event.schedule == '0 13 * * 6' # 토요일만
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check Lottery Results
+        run: |
+          curl -X POST ${{ secrets.APP_URL }}/cron/check-results
